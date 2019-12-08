@@ -21,4 +21,19 @@ app.get("/portfolios", (req, res) => {
     .catch(err => console.error(err));
 })
 
+// Create new category
+app.post("/portfolios", (req, res) => {
+  const newProjetCategory = req.body;
+  admin.firestore()
+    .collection("portfolios")
+    .add(newProjetCategory)
+    .then(data => {
+      return res.json({message: `Document ${data.id} created successfully!`});
+    })
+    .catch(err => {
+      res.status(500).json({error: "New project category creation failed!"});
+      console.error(err);
+    });
+});
+
 exports.api = functions.region("asia-east2").https.onRequest(app);
