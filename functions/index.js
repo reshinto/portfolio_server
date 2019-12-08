@@ -3,15 +3,14 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-// Create and Deploy Your First Cloud Functions
-// https://firebase.google.com/docs/functions/write-firebase-functions
+const express = require("express");
+const app = express();
 
 // Read
-exports.getPortfolios = functions.https.onRequest((req, res) => {
-  if (req.method !== "GET") {
-    return res.status(400).json({error: "Invalid request method!"});
-  }
-  admin.firestore().collection("portfolios").get()
+app.get("/portfolios", (req, res) => {
+  admin.firestore()
+    .collection("portfolios")
+    .get()
     .then(data => {
       let portfolios;
       data.forEach(portfolio => {
@@ -20,4 +19,6 @@ exports.getPortfolios = functions.https.onRequest((req, res) => {
       return res.json(portfolios)
     })
     .catch(err => console.error(err));
-});
+})
+
+exports.api = functions.region("asia-east2").https.onRequest(app);
