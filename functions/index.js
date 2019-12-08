@@ -1,10 +1,23 @@
+require('dotenv').config()
 const functions = require('firebase-functions');
 const admin = require("firebase-admin");
+const app = require("express")();
+const firebase = require("firebase");
+const cors = require("cors");
 
 admin.initializeApp();
-
-const express = require("express");
-const app = express();
+app.use(cors());
+const config = {
+    apiKey: process.env.apiKey,
+    authDomain: process.env.authDomain,
+    databaseURL: process.env.databaseURL,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
+    measurementId: process.env.measurementId
+}
+firebase.initializeApp(config);
 
 // Read
 app.get("/portfolios", (req, res) => {
