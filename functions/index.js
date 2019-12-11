@@ -1,4 +1,4 @@
-require('dotenv').config()
+// require('dotenv').config()
 const functions = require('firebase-functions');
 const admin = require("firebase-admin");
 const app = require("express")();
@@ -16,9 +16,11 @@ app.get("/portfolios", (req, res) => {
     .collection("portfolios")
     .get()
     .then(data => {
-      let portfolios;
+      const portfolios = {};
       data.forEach(portfolio => {
-        portfolios = portfolio.data();
+        const tempKey = Object.keys(portfolio.data())[0];
+        const tempValue = Object.values(portfolio.data())[0];
+        portfolios[tempKey] = tempValue;
       });
       return res.json(portfolios)
     })
