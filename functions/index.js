@@ -27,6 +27,22 @@ app.get("/portfolios", (req, res) => {
     .catch(err => console.error(err));
 })
 
+// Update portfolio
+app.post("/portfolios/update", (req, res) => {
+  const newProjet = req.body;
+  admin.firestore()
+    .collection("portfolios")
+    .doc("ohbGgHGECOQOhv06dEKV")
+    .update(newProjet)
+    .then(data => {
+      return res.json({message: `Document updated successfully!`})
+    })
+    .catch(err => {
+      res.status(500).json({error: "Project update failed!"});
+      console.error(err);
+    });
+})
+
 // Create new category
 app.post("/portfolios", (req, res) => {
   const newProjetCategory = req.body;
