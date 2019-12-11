@@ -4,19 +4,10 @@ const admin = require("firebase-admin");
 const app = require("express")();
 const firebase = require("firebase");
 const cors = require("cors");
+const config = require("./utility/config");
 
 admin.initializeApp();
 app.use(cors());
-const config = {
-    apiKey: process.env.apiKey,
-    authDomain: process.env.authDomain,
-    databaseURL: process.env.databaseURL,
-    projectId: process.env.projectId,
-    storageBucket: process.env.storageBucket,
-    messagingSenderId: process.env.messagingSenderId,
-    appId: process.env.appId,
-    measurementId: process.env.measurementId
-}
 firebase.initializeApp(config);
 
 // Read
@@ -46,6 +37,25 @@ app.post("/portfolios", (req, res) => {
     .catch(err => {
       res.status(500).json({error: "New project category creation failed!"});
       console.error(err);
+    });
+});
+
+app.post("/signup", (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    username: req.body.username
+  };
+  firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      return res.status(201).json({
+        message: `User ${data.user.uid} signed up successfully!`
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({error: err.code});
     });
 });
 
