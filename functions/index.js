@@ -16,11 +16,9 @@ app.get("/portfolios", (req, res) => {
     .collection("portfolios")
     .get()
     .then(data => {
-      const portfolios = {};
+      let portfolios;
       data.forEach(portfolio => {
-        const tempKey = Object.keys(portfolio.data())[0];
-        const tempValue = Object.values(portfolio.data())[0];
-        portfolios[tempKey] = tempValue;
+        portfolios = portfolio.data()
       });
       return res.json(portfolios)
     })
@@ -44,19 +42,19 @@ app.post("/portfolios/update", (req, res) => {
 })
 
 // Create new category
-app.post("/portfolios", (req, res) => {
-  const newProjetCategory = req.body;
-  admin.firestore()
-    .collection("portfolios")
-    .add(newProjetCategory)
-    .then(data => {
-      return res.json({message: `Document ${data.id} created successfully!`});
-    })
-    .catch(err => {
-      res.status(500).json({error: "New project category creation failed!"});
-      console.error(err);
-    });
-});
+// app.post("/portfolios", (req, res) => {
+//   const newProjetCategory = req.body;
+//   admin.firestore()
+//     .collection("portfolios")
+//     .add(newProjetCategory)
+//     .then(data => {
+//       return res.json({message: `Document ${data.id} created successfully!`});
+//     })
+//     .catch(err => {
+//       res.status(500).json({error: "New project category creation failed!"});
+//       console.error(err);
+//     });
+// });
 
 app.post("/signup", (req, res) => {
   const newUser = {
