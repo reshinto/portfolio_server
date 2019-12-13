@@ -1,10 +1,12 @@
-// require('dotenv').config()
-const functions = require('firebase-functions');
+// require("dotenv").config()
+const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const app = require("express")();
 const firebase = require("firebase");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 const config = require("./utility/config");
+const emailsettings = require("./utility/emailsettings");
 
 admin.initializeApp();
 app.use(cors());
@@ -39,6 +41,32 @@ app.post("/portfolios/update", (req, res) => {
       res.status(500).json({error: "Project update failed!"});
       console.error(err);
     });
+})
+
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: emailsettings
+});
+
+app.post("/sendemail", (req, res) => {
+  // getting dest email by query string
+  const {email, subject, message} = req.body;
+  console.log(req.body, email)
+  const mailOptions = {
+    from: email,
+    to: emailsettings.user,
+    subject: `From ${email}, ${subject}`, // email subject
+    html: `<p style="font-size: 16px;">${message}</p>
+    ` // email content in HTML
+  };
+
+  // returning result
+  return transporter.sendMail(mailOptions, (erro, info) => {
+    if(erro){
+      return res.send(erro.toString());
+    }
+    return res.send('Sended');
+  });
 })
 
 // Create new category
