@@ -6,5 +6,7 @@ module.exports = {
   storageBucket: process.env.storage_bucket,
   messagingSenderId: process.env.messaging_sender_id,
   appId: process.env.app_id,
-  measurementId: process.env.measurement_id
+  measurementId: process.env.measurement_id,
+  user: process.env.gmail,
+  pass: process.env.password
 };

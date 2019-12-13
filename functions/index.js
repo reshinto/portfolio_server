@@ -6,7 +6,9 @@ const firebase = require("firebase");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 const config = require("./utility/config");
-const emailsettings = require("./utility/emailsettings");
+
+const gmailEmail = functions.config().config.user;
+const gmailPassword = functions.config().config.pass;
 
 admin.initializeApp();
 app.use(cors());
@@ -44,17 +46,19 @@ app.post("/portfolios/update", (req, res) => {
 })
 
 let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: emailsettings
+  service: 'gmail',
+  auth: {
+    user: gmailEmail,
+    pass: gmailPassword
+  }
 });
 
 app.post("/sendemail", (req, res) => {
   // getting dest email by query string
   const {email, subject, message} = req.body;
-  console.log(req.body, email)
   const mailOptions = {
     from: email,
-    to: emailsettings.user,
+    to: gmailEmail,
     subject: `From ${email}, ${subject}`, // email subject
     html: `<p style="font-size: 16px;">${message}</p>
     ` // email content in HTML
