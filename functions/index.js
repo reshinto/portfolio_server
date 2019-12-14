@@ -14,9 +14,11 @@ admin.initializeApp();
 app.use(cors());
 firebase.initializeApp(config);
 
+const db = admin.firestore();
+
 // Read
 app.get("/portfolios", (req, res) => {
-  admin.firestore()
+  db
     .collection("portfolios")
     .get()
     .then(data => {
@@ -32,7 +34,7 @@ app.get("/portfolios", (req, res) => {
 // Update portfolio
 app.post("/portfolios/update", (req, res) => {
   const newProjet = req.body;
-  admin.firestore()
+  db
     .collection("portfolios")
     .doc("ohbGgHGECOQOhv06dEKV")
     .update(newProjet)
