@@ -1,4 +1,4 @@
-require("dotenv").config()
+// require("dotenv").config();
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const app = require("express")();
@@ -7,14 +7,47 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 const config = require("./utility/config");
 
-// const gmailEmail = functions.config().config.user;
-// const gmailPassword = functions.config().config.pass;
+const gmailEmail = functions.config().config.user;
+const gmailPassword = functions.config().config.pass;
 
 admin.initializeApp();
 app.use(cors());
 firebase.initializeApp(config);
 
 const db = admin.firestore();
+
+const checkUser = (req, res, next) => {
+  let idToken;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    idToken = req.headers.authorization.split("Bearer ")[1];
+  } else {
+    console.error("No token found");
+    return res.status(403).json({error: "Unauthorized!"});
+  }
+
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then(decodedToken => {
+      req.user = decodedToken;
+      return db
+        .collection("users")
+        .where("userId", "==", req.user.uid)
+        .limit(1)
+        .get();
+    })
+    .then(data => {
+      req.user.username = data.docs[0].data().username;
+      return next();
+    })
+    .catch(err => {
+      console.error("error while verifying token ", err);
+      return res.status(403).json(err);
+    });
+};
 
 // Read
 app.get("/portfolios", (req, res) => {
@@ -31,7 +64,7 @@ app.get("/portfolios", (req, res) => {
 });
 
 // Update portfolio
-app.post("/portfolios/update", (req, res) => {
+app.post("/portfolios/update", checkUser, (req, res) => {
   const newProjet = req.body;
   db.collection("portfolios")
     .doc("ohbGgHGECOQOhv06dEKV")
@@ -45,33 +78,33 @@ app.post("/portfolios/update", (req, res) => {
     });
 });
 
-// let transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: gmailEmail,
-//     pass: gmailPassword,
-//   },
-// });
+let transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: gmailEmail,
+    pass: gmailPassword,
+  },
+});
 
-// app.post("/sendemail", (req, res) => {
-//   // getting dest email by query string
-//   const {email, subject, message} = req.body;
-//   const mailOptions = {
-//     from: email,
-//     to: gmailEmail,
-//     subject: `From ${email}, ${subject}`, // email subject
-//     html: `<p style="font-size: 16px;">${message}</p>
-//     `, // email content in HTML
-//   };
+app.post("/sendemail", (req, res) => {
+  // getting dest email by query string
+  const {email, subject, message} = req.body;
+  const mailOptions = {
+    from: email,
+    to: gmailEmail,
+    subject: `From ${email}, ${subject}`, // email subject
+    html: `<p style="font-size: 16px;">${message}</p>
+    `, // email content in HTML
+  };
 
-//   // returning result
-//   return transporter.sendMail(mailOptions, (erro, info) => {
-//     if (erro) {
-//       return res.send(erro.toString());
-//     }
-//     return res.send("Sended");
-//   });
-// });
+  // returning result
+  return transporter.sendMail(mailOptions, (erro, info) => {
+    if (erro) {
+      return res.send(erro.toString());
+    }
+    return res.send("Sended");
+  });
+});
 
 // Create new category
 // app.post("/portfolios", (req, res) => {
@@ -139,7 +172,7 @@ app.post("/signup", (req, res) => {
 app.post("/login", (req, res) => {
   const user = {
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
   };
   firebase
     .auth()
@@ -148,13 +181,13 @@ app.post("/login", (req, res) => {
       return data.user.getIdToken();
     })
     .then(_token => {
-      return res.json({ _token });
+      return res.json({_token});
     })
     .catch(err => {
       console.error(err);
       return res
         .status(403)
-        .json({ general: 'Wrong credetials, please try again' });
+        .json({general: "Wrong credetials, please try again"});
     });
 });
 
