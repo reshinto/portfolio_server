@@ -7,9 +7,6 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 const config = require("./utility/config");
 
-const gmailEmail = functions.config().config.user;
-const gmailPassword = functions.config().config.pass;
-
 admin.initializeApp();
 app.use(cors());
 firebase.initializeApp(config);
@@ -78,6 +75,9 @@ app.post("/portfolios/update", checkUser, (req, res) => {
     });
 });
 
+const gmailEmail = functions.config().config.user;
+const gmailPassword = functions.config().config.pass;
+
 let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -90,8 +90,9 @@ app.post("/sendemail", (req, res) => {
   // getting dest email by query string
   const {email, subject, message} = req.body;
   const mailOptions = {
-    from: email,
+    from: "Terence's server",
     to: gmailEmail,
+    cc: email,
     subject: `From ${email}, ${subject}`, // email subject
     html: `<p style="font-size: 16px;">${message}</p>
     `, // email content in HTML
